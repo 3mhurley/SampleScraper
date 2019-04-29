@@ -16,22 +16,22 @@ app.use(express.json())
 app.use(express.static("public"))
 
 var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/mongoHeadlines"
-
 mongoose.connect(MONGODB_URI, { useNewUrlParser: true })
 
-mongoose.connect("mongodb://localhost/unit18Populater")
-
 app.get("/scrape", function(req, res) {
-	axios.get("http://www.echojs.com/").then(function(response) {
+	axios.get("http://www.spiegel.de/").then(function(response) {
 		var $ = cheerio.load(response.data)
-		$("article h2").each(function(i, element) {
+		$("div.teaser").each(function(i, element) {
 			var result = {}
 
 			result.title = $(this)
-				.children("a")
+				.find("a.article-class")
+				.attr("title")
+			result.summary = $(this)
+				.find("p.article-intro")
 				.text()
 			result.link = $(this)
-				.children("a")
+				.find("a.article-class")
 				.attr("href")
 
 			db.Article.create(result)
